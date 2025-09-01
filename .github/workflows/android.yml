@@ -2,11 +2,12 @@ name: Android CI
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -16,8 +17,23 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          cmake: "none"
+          ndk: "none"
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Set up Gradle (without wrapper)
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: "8.4"
+
+      - name: Build Debug APK
+        run: gradle :app:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
