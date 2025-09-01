@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -17,20 +18,22 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # Правильная настройка Android SDK для v3 (без api-level)
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34
-          cmake: "none"
-          ndk: "none"
+          accept-android-sdk-licenses: true
+          cmdline-tools-version: 10406996
+          packages: |
+            platform-tools
+            platforms;android-34
+            build-tools;34.0.0
 
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
-
-      - name: Set up Gradle (without wrapper)
+      # Используем системный Gradle (у нас нет gradle-wrapper в репо)
+      - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: "8.4"
+          gradle-version: '8.4'
 
       - name: Build Debug APK
         run: gradle :app:assembleDebug
